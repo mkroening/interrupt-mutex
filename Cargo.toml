@@ -14,5 +14,5 @@ interrupts = "0.1"
 lock_api = "0.4"
 
 [dev-dependencies]
-nix = { version = "0.27", features = ["signal"] }
+nix = { version = "0.28", features = ["signal"] }
 parking_lot = "0.12"
