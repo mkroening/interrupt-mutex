@@ -86,6 +86,7 @@ unsafe impl<I: Sync> Sync for RawInterruptMutex<I> {}
 unsafe impl<I: Send> Send for RawInterruptMutex<I> {}
 
 unsafe impl<I: RawMutex> RawMutex for RawInterruptMutex<I> {
+    #[allow(clippy::declare_interior_mutable_const)]
     const INIT: Self = Self {
         inner: I::INIT,
         interrupt_guard: UnsafeCell::new(MaybeUninit::uninit()),
