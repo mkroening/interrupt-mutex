@@ -1,4 +1,4 @@
-//! A mutex for sharing data with interrupt handlers or signal handlers.
+//! A mutex for sharing data with interrupt handlers.
 //!
 //! Using normal mutexes to share data with interrupt handlers may result in deadlocks.
 //! This is because interrupts may be raised while the mutex is being held on the same thread.
@@ -25,7 +25,7 @@
 //!
 //! # Examples
 //!
-//! ```
+//! ```no_run
 //! // Make a mutex of your choice into an `InterruptMutex`.
 //! type InterruptMutex<T> = interrupt_mutex::InterruptMutex<parking_lot::RawMutex, T>;
 //!
@@ -35,21 +35,7 @@
 //!     X.lock().push(1);
 //! }
 //! #
-//! # // Setup signal handling for demo
-//! #
-//! # use nix::libc;
-//! # use nix::sys::signal::{self, SigHandler, Signal};
-//! #
-//! # extern "C" fn handle_sigint(_signal: libc::c_int) {
-//! #     interrupt_handler();
-//! # }
-//! #
-//! # let handler = SigHandler::Handler(handle_sigint);
-//! # unsafe { signal::signal(Signal::SIGINT, handler) }.unwrap();
-//! #
-//! # fn raise_interrupt() {
-//! #     signal::raise(Signal::SIGINT);
-//! # }
+//! # fn raise_interrupt() {}
 //!
 //! let v = X.lock();
 //! // Raise an interrupt
@@ -71,7 +57,7 @@ use core::mem::MaybeUninit;
 
 use lock_api::{GuardNoSend, RawMutex};
 
-/// A mutex for sharing data with interrupt handlers or signal handlers.
+/// A mutex for sharing data with interrupt handlers.
 ///
 /// This mutex wraps another [`RawMutex`] and disables interrupts while locked.
 pub struct RawInterruptMutex<I> {

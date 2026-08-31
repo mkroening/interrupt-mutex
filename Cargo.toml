@@ -3,16 +3,15 @@ name = "interrupt-mutex"
 version = "0.1.0"
 authors = ["Martin Kröning <mkroening@posteo.net>"]
 edition = "2021"
-description = "A mutex for sharing data with interrupt handlers or signal handlers."
+description = "A mutex for sharing data with interrupt handlers."
 repository = "https://github.com/mkroening/interrupt-mutex"
 license = "MIT OR Apache-2.0"
-keywords = ["interrupts", "signals", "disable", "without"]
-categories = ["no-std::no-alloc", "os::unix-apis"]
+keywords = ["interrupts", "disable", "without"]
+categories = ["no-std::no-alloc"]
 
 [dependencies]
-interrupts = "0.1"
+interrupts = "0.2"
 lock_api = "0.4"
 
 [dev-dependencies]
-nix = { version = "0.31", features = ["signal"] }
 parking_lot = "0.12"

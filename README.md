@@ -4,7 +4,7 @@
 [![docs.rs](https://img.shields.io/docsrs/interrupt-mutex)](https://docs.rs/interrupt-mutex)
 [![CI](https://github.com/mkroening/interrupt-mutex/actions/workflows/ci.yml/badge.svg)](https://github.com/mkroening/interrupt-mutex/actions/workflows/ci.yml)
 
-A mutex for sharing data with interrupt handlers or signal handlers.
+A mutex for sharing data with interrupt handlers.
 
 ```rust
 // Make a mutex of your choice into an `InterruptMutex`.
