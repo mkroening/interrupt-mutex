@@ -1,7 +1,6 @@
 [package]
 name = "interrupt-mutex"
 version = "0.1.0"
-authors = ["Martin Kröning <mkroening@posteo.net>"]
 edition = "2021"
 description = "A mutex for sharing data with interrupt handlers."
 repository = "https://github.com/mkroening/interrupt-mutex"
