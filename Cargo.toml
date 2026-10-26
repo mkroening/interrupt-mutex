@@ -13,4 +13,4 @@ interrupts = "0.2"
 lock_api = "0.4"
 
 [dev-dependencies]
-parking_lot = "0.12"
+parking_lot = "0.13"
