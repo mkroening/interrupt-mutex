@@ -10,7 +10,7 @@ categories = ["no-std::no-alloc"]
 
 [dependencies]
 interrupts = "0.2"
-lock_api = "0.4"
+lock_api = "0.5"
 
 [dev-dependencies]
 parking_lot = "0.12"
