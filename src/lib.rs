@@ -52,17 +52,13 @@
 
 #![no_std]
 
-use core::cell::UnsafeCell;
-use core::mem::MaybeUninit;
-
-use lock_api::{GuardNoSend, RawMutex};
+use lock_api::RawMutex;
 
 /// A mutex for sharing data with interrupt handlers.
 ///
 /// This mutex wraps another [`RawMutex`] and disables interrupts while locked.
 pub struct RawInterruptMutex<I> {
     inner: I,
-    interrupt_guard: UnsafeCell<MaybeUninit<interrupts::Guard>>,
 }
 
 // SAFETY: The `UnsafeCell` is locked by `inner`, initialized on `lock` and uninitialized on `unlock`.
@@ -71,48 +67,42 @@ unsafe impl<I: Sync> Sync for RawInterruptMutex<I> {}
 // Sending them while unlocked is fine.
 unsafe impl<I: Send> Send for RawInterruptMutex<I> {}
 
+pub struct InterruptGuard<I> {
+    interrupt_guard: interrupts::Guard,
+    inner: I,
+}
+
 unsafe impl<I: RawMutex> RawMutex for RawInterruptMutex<I> {
     #[allow(clippy::declare_interior_mutable_const)]
-    const INIT: Self = Self {
-        inner: I::INIT,
-        interrupt_guard: UnsafeCell::new(MaybeUninit::uninit()),
-    };
+    const INIT: Self = Self { inner: I::INIT };
 
-    type GuardMarker = GuardNoSend;
+    type Guard = InterruptGuard<I::Guard>;
 
     #[inline]
-    fn lock(&self) {
-        let guard = interrupts::disable();
-        self.inner.lock();
-        // SAFETY: We have exclusive access through locking `inner`.
-        unsafe {
-            self.interrupt_guard.get().write(MaybeUninit::new(guard));
+    fn lock(&self) -> Self::Guard {
+        let interrupt_guard = interrupts::disable();
+        let inner = self.inner.lock();
+        Self::Guard {
+            interrupt_guard,
+            inner,
         }
     }
 
     #[inline]
-    fn try_lock(&self) -> bool {
-        let guard = interrupts::disable();
-        let ok = self.inner.try_lock();
-        if ok {
-            // SAFETY: We have exclusive access through locking `inner`.
-            unsafe {
-                self.interrupt_guard.get().write(MaybeUninit::new(guard));
-            }
-        }
-        ok
+    fn try_lock(&self) -> Option<Self::Guard> {
+        let interrupt_guard = interrupts::disable();
+        self.inner.try_lock().map(|inner| Self::Guard {
+            interrupt_guard,
+            inner,
+        })
     }
 
     #[inline]
-    unsafe fn unlock(&self) {
-        // SAFETY: We have exclusive access through locking `inner`.
-        let guard = unsafe { self.interrupt_guard.get().replace(MaybeUninit::uninit()) };
-        // SAFETY: `guard` was initialized when locking.
-        let guard = unsafe { guard.assume_init() };
+    unsafe fn unlock(&self, guard: Self::Guard) {
         unsafe {
-            self.inner.unlock();
+            self.inner.unlock(guard.inner);
         }
-        drop(guard);
+        drop(guard.interrupt_guard)
     }
 
     #[inline]
